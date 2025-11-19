@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <title>SUAMP - Utility Asset Management Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Codebucks" name="author" />
+    <link rel="icon" href="/static/assets/images/logo/logo.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/static/assets/images/logo/logo.png" />
+    <meta name="msapplication-TileImage" content="/static/assets/images/logo/logo.png" />
+
+    <!-- <img src="/static/assets/images/logo/logo.png" alt="logo-sm-light" height="20"> -->
+    <!-- dark layout js -->
+    <script src="/static/assets/js/pages/layout.js"></script>
+
+    <!-- Bootstrap Css -->
+    <link href="/static/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="/static/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- simplebar css -->
+    <link href="/static/assets/libs/simplebar/simplebar.min.css" rel="stylesheet">
+    <!-- App Css-->
+    <link href="/static/assets/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+<div id="layout-wrapper">
+
+    
+    {% include 'partials/topbar.html' %}
+
+    <!-- ========== Left Sidebar Start ========== -->
+     
+    <div class="sidebar-left">
+
+        <div data-simplebar class="h-100">
+
+            <!--- Sidebar-menu -->
+            {% include 'partials/sidebar-left.html' %}
+            <!-- Sidebar -->
+        </div>
+    </div>
+    <!-- Left Sidebar End -->
+
+
+    <!-- Start right Content here -->
+
+    <div class="main-content">
+        <div class="page-content">
+            <div class="container-fluid">
+                {% block content %}
+                {% endblock %}
+                </div>
+                <!-- end row -->
+            </div>
+            <!-- end container-fluid -->
+        </div>
+        <!-- End Page-content -->
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-sm-6">
+                        <script>document.write(new Date().getFullYear())</script> © GRIDCo & ECG.
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end d-none d-sm-block">
+                            Crafted with <i class="mdi mdi-heart text-danger"></i> by <a href="https://gridcogh.com" target="_blank" class="text-muted">GRIDCo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- end main content-->
+</div>
+<!-- end layout-wrapper -->
+
+
+<div class="custom-setting bg-secondary pe-0 d-flex flex-column rounded-start">
+    <button type="button" class="btn btn-wide border-0 text-white fs-20 avatar-sm rounded-end-0" id="light-dark-mode">
+        <i class="mdi mdi-brightness-7 align-middle"></i>
+        <i class="mdi mdi-white-balance-sunny align-middle"></i>
+    </button>
+    <button type="button" class="btn btn-wide border-0 text-white fs-20 avatar-sm" data-toggle="fullscreen">
+        <i class="mdi mdi-arrow-expand-all align-middle"></i>
+    </button>
+    <!-- <button type="button" class="btn btn-wide border-0 text-white fs-16 avatar-sm" id="layout-dir-btn">
+        <span>RTL</span>
+    </button> -->
+</div>
+
+
+<!-- Rightbar Sidebar -->
+<div class="offcanvas offcanvas-end" id="offcanvas-rightsidabar">
+    <div class="card h-100 rounded-0" data-simplebar="init">
+        <div class="card-header bg-light">
+            <h6 class="card-title text-uppercase">Activities</h6>
+            <div class="card-addon">
+                <button class="btn btn-label-danger" data-bs-dismiss="offcanvas">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="">
+                <h3 class="card-title">Company summary</h3>
+                <div class="border rounded p-2">
+                    <p class="text-muted mb-2">Server Load</p>
+                    <h4 class="fs-16 mb-2">489</h4>
+                    <div class="progress progress-sm" style="height:4px;">
+                        <div class="progress-bar bg-success" style="width: 49.4%"></div>
+                    </div>
+                    <p class="text-muted mb-0 mt-1">49.4% <span>Avg</span></p>
+                </div>
+                <div class="border rounded p-2">
+                    <p class="text-muted mb-2">Members online</p>
+                    <h4 class="fs-16 mb-2">3,450</h4>
+                    <div class="progress progress-sm" style="height:4px;">
+                        <div class="progress-bar bg-danger" style="width: 34.6%"></div>
+                    </div>
+                    <p class="text-muted mb-0 mt-1">34.6% <span>Avg</span></p>
+                </div>
+                <div class="border rounded p-2">
+                    <p class="text-muted mb-2">Today's revenue</p>
+                    <h4 class="fs-16 mb-2">$18,390</h4>
+                    <div class="progress progress-sm" style="height:4px;">
+                        <div class="progress-bar bg-warning" style="width: 20%"></div>
+                    </div>
+                    <p class="text-muted mb-0 mt-1">$37,578 <span>Avg</span></p>
+                </div>
+                <div class="border rounded p-2">
+                    <p class="text-muted mb-2">Expected profit</p>
+                    <h4 class="fs-16 mb-2">$23,461</h4>
+                    <div class="progress progress-sm" style="height:4px;">
+                        <div class="progress-bar bg-info" style="width: 60%"></div>
+                    </div>
+                    <p class="text-muted mb-0 mt-1">$23,461 <span>Avg</span></p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h3 class="card-title">Latest log</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-secondary"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">12 new users registered</p>
+                                <span class="text-muted">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-success"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">System shutdown <span class="badge badge-label-success">pending</span></p>
+                                <span class="text-muted">2 mins</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-secondary"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">New invoice received</p>
+                                <span class="text-muted">3 mins</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-danger"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">New order received <span class="badge badge-label-danger">urgent</span></p>
+                                <span class="text-muted">10 mins</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-warning"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">Production server down</p>
+                                <span class="text-muted">1 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-info"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">System error <a href="index.html#">check</a></p>
+                                <span class="text-muted">2 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-secondary"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">DB overloaded 80%</p>
+                                <span class="text-muted">5 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-pin"><i class="marker marker-dot text-success"></i></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">Production server up</p>
+                                <span class="text-muted">6 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h3 class="card-title">Upcoming activities</h3>
+                <div class="timeline timeline-timed">
+                    <div class="timeline-item">
+                        <span class="timeline-time">10:00</span>
+                        <div class="timeline-pin"><i class="marker marker-circle text-secondary"></i></div>
+                        <div class="timeline-content">
+                            <div>
+                                <span>Meeting with</span>
+                                <div class="avatar-group ms-2">
+                                    <div class="avatar avatar-circle">
+                                        <img src="/static/assets/images/users/avatar-1.png" alt="Avatar image" class="avatar-2xs" />
+                                    </div>
+                                    <div class="avatar avatar-circle">
+                                        <img src="/static/assets/images/users/avatar-2.png" alt="Avatar image" class="avatar-2xs" />
+                                    </div>
+                                    <div class="avatar avatar-circle">
+                                        <img src="/static/assets/images/users/avatar-3.png" alt="Avatar image" class="avatar-2xs" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">12:45</span>
+                        <div class="timeline-pin"><i class="marker marker-circle text-warning"></i></div>
+                        <div class="timeline-content">
+                            <p class="mb-0">Lorem ipsum dolor sit amit,consectetur eiusmdd tempor incididunt ut labore et dolore magna elit enim at minim veniam quis nostrud</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">14:00</span>
+                        <div class="timeline-pin"><i class="marker marker-circle text-danger"></i></div>
+                        <div class="timeline-content">
+                            <p class="mb-0">Received a new feedback on <a href="index.html#">GoFinance</a> App product.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">15:20</span>
+                        <div class="timeline-pin"><i class="marker marker-circle text-success"></i></div>
+                        <div class="timeline-content">
+                            <p class="mb-0">Lorem ipsum dolor sit amit,consectetur eiusmdd tempor incididunt ut labore et dolore magna.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">17:00</span>
+                        <div class="timeline-pin"><i class="marker marker-circle text-info"></i></div>
+                        <div class="timeline-content">
+                            <p class="mb-0">Make Deposit <a href="index.html#">USD 700</a> o ESL.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- end card-->
+</div>
+
+<!-- JAVASCRIPT -->
+<script src="/static/assets/libs/jquery/jquery.min.js"></script>
+<script src="/static/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/assets/libs/metismenu/metisMenu.min.js"></script>
+<script src="/static/assets/libs/simplebar/simplebar.min.js"></script>
+<script src="/static/assets/libs/node-waves/waves.min.js"></script>
+
+
+<!-- apexcharts -->
+<script src="/static/assets/libs/apexcharts/apexcharts.min.js"></script>
+
+<script src="/static/assets/js/pages/dashboard.init.js"></script>
+
+<!-- App js -->
+<script src="/static/assets/js/app.js"></script>
+</body>
+
+</html>
