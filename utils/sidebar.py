@@ -33,22 +33,22 @@ class Sidebar:
             "sub_items": {
                 "Property Registry": {
                     "icon": "fas fa-building", 
-                    "url": "/properties/registry/", 
+                    "url": "/property-registry/", 
                     "groups": ["Admin", "Assessment Team", "Planning Team", "GIS Team"]
                 },
                 "Property Valuation": {
                     "icon": "fas fa-calculator", 
-                    "url": "/properties/valuation/",
+                    "url": "/property-valuation/",
                     "groups": ["Admin", "Assessment Team", "Finance Team", "Management"]
                 },
                 "Property Classification": {
                     "icon": "fas fa-tags", 
-                    "url": "/properties/classification/",
+                    "url": "/property-classification/",
                     "groups": ["Admin", "Assessment Team", "Planning Team", "Finance Team"]
                 },
                 "Owner Management": {
                     "icon": "fas fa-users", 
-                    "url": "/properties/owners/",
+                    "url": "/property-owners/",
                     "groups": ["Admin", "Assessment Team", "Customer Service", "Finance Team"]
                 },
                 "GIS Property Mapping": {
@@ -85,40 +85,40 @@ class Sidebar:
             "sub_items": {
                 "Bill Generation": {
                     "icon": "fas fa-receipt", 
-                    "url": "/billing/generation/",
+                    "url": "/bill-generation/",
                     "groups": ["Admin", "Finance Team", "Billing Team"]
                 },
                 "Rate Management": {
                     "icon": "fas fa-percentage", 
-                    "url": "/billing/rates/",
+                    "url": "/billing/rates-management/",
                     "groups": ["Admin", "Finance Team", "Management"]
                 },
                 "Tax Calculation": {
                     "icon": "fas fa-calculator", 
-                    "url": "/billing/calculation/",
+                    "url": "/billing/tax-calculation/",
                     "groups": ["Admin", "Finance Team", "Assessment Team"]
                 },
                 "Billing Cycles": {
                     "icon": "fas fa-calendar-alt", 
-                    "url": "/billing/cycles/",
+                    "url": "/billing-cycles/",
                     "groups": ["Admin", "Finance Team", "Billing Team"]
                 },
-                "Billing Reports": {
-                    "icon": "fas fa-file-contract", 
-                    "groups": ["Admin", "CEO", "Director", "Finance Team"],
-                    "sub_items": {
-                        "Billing Summary": {
-                            "icon": "fas fa-file-invoice", 
-                            "url": "/billing/reports/summary/",
-                            "groups": ["Admin", "Finance Team", "Management"]
-                        },
-                        "Revenue Projections": {
-                            "icon": "fas fa-chart-line", 
-                            "url": "/billing/reports/projections/",
-                            "groups": ["Admin", "CEO", "Director", "Finance Team"]
-                        },
-                    }
-                },
+                # "Billing Reports": {
+                #     "icon": "fas fa-file-contract", 
+                #     "groups": ["Admin", "CEO", "Director", "Finance Team"],
+                #     "sub_items": {
+                #         "Billing Summary": {
+                #             "icon": "fas fa-file-invoice", 
+                #             "url": "/billing/reports/summary/",
+                #             "groups": ["Admin", "Finance Team", "Management"]
+                #         },
+                #         "Revenue Projections": {
+                #             "icon": "fas fa-chart-line", 
+                #             "url": "/billing/reports/projections/",
+                #             "groups": ["Admin", "CEO", "Director", "Finance Team"]
+                #         },
+                #     }
+                # },
             }
         },
         

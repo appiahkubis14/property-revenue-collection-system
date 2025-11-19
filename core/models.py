@@ -1,4 +1,5 @@
 import random
+import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -89,7 +90,7 @@ class UserRole(TimeStampModel):
         ('director', 'Director'),
         ('finance_team', 'Finance Team'),
         ('assessment_team', 'Assessment Team'),
-        # ... other roles from sidebar groups
+        
     )
     name = models.CharField(max_length=50, choices=ROLE_CHOICES)
     permissions = models.JSONField()  # Store specific permissions
@@ -228,7 +229,9 @@ class Property(TimeStampModel):
 
 
     def generate_property_id(self):
-        return f"PROP-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
+        # Generate a random property ID
+        property_id = secrets.token_hex(10)
+        return property_id
   
 
     def __str__(self):
@@ -287,6 +290,7 @@ class BillingCycle(TimeStampModel):
     start_date = models.DateField()
     end_date = models.DateField()
     due_date = models.DateField()
+    description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -303,14 +307,14 @@ class Bill(TimeStampModel):
         ('cancelled', 'Cancelled'),
     )
     
-    bill_number = models.CharField(max_length=20, unique=True)
+    bill_number = models.CharField(max_length=100, unique=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bills')
-    billing_cycle = models.ForeignKey(BillingCycle, on_delete=models.PROTECT, related_name='bills')
+    billing_cycle = models.ForeignKey(BillingCycle, on_delete=models.PROTECT, related_name='bills', null=True, blank=True)
     tax_amount = models.DecimalField(max_digits=12, decimal_places=2)
     penalty_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=BILL_STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=100, choices=BILL_STATUS_CHOICES, default='draft')
     generated_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateField()
     sent_date = models.DateTimeField(null=True, blank=True)
