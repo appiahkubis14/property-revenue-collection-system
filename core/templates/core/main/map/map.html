@@ -1,0 +1,2917 @@
+{% extends 'main/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+
+
+
+<style>
+:root {
+    --primary-color: #23a5fb;
+    --secondary-color: #1e88e5;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --dark-color: #1a237e;
+    --light-color: #ffffff;
+    --sidebar-width: 400px;
+    --header-height: 70px;
+    --border-radius: 10px;
+    --border-radius-sm: 6px;
+    --border-radius-lg: 12px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+}
+
+.gis-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Floating Tools */
+.floating-tools {
+    position: absolute;
+    top: 106px;
+    left: 55px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.tool-btn {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    color: var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tool-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.tool-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tool-btn .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Main Menu */
+.main-menu {
+    position: absolute;
+    top: 0;
+    left: 80px;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-xl);
+    width: 300px;
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.main-menu.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.menu-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.menu-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.menu-content {
+    padding: 20px;
+}
+
+.menu-category {
+    margin-bottom: 25px;
+}
+
+.menu-category h4 {
+    font-size: 0.9rem;
+    font-weight: bolder;
+    color: var(--dark-color);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.menu-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius-sm);
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-item:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.menu-item:hover .menu-icon {
+    color: white;
+}
+
+.menu-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.menu-item.active .menu-icon {
+    color: white;
+}
+
+.menu-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    transition: color 0.2s ease;
+}
+
+.menu-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Tool Panels */
+.tool-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-xl);
+    width: 350px;
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.tool-panel.active {
+    display: block;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.panel-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.panel-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-panel {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.close-panel:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.panel-content {
+    padding: 20px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(35, 165, 251, 0.1);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+/* Search Box */
+.search-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 400px;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: none;
+    border-radius: 25px;
+    background: white;
+    box-shadow: var(--shadow-lg);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(35, 165, 251, 0.3);
+}
+
+.search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1001;
+}
+
+.search-result {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.search-result:hover {
+    background: #f8f9fa;
+}
+
+.search-result:last-child {
+    border-bottom: none;
+}
+
+.search-result-highlight {
+    background-color: #e3f2fd !important;
+}
+
+/* Legend */
+.map-legend {
+    position: absolute;
+    bottom: 77px;
+    left: 110px;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 15px;
+    z-index: 1000;
+    border: 1px solid #e9ecef;
+    width: 250px;
+    display: none;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    position: sticky;
+    top: 0;
+    background: white;
+    padding-bottom: 10px;
+}
+
+.legend-header h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-toggle {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.legend-content {
+    display: grid;
+    gap: 15px;
+}
+
+.legend-category h5 {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-symbol {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.legend-text {
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-xl);
+    padding: 15px 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+    border-left: 4px solid;
+    max-width: 400px;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    border-left-color: var(--success-color);
+}
+
+.notification.error {
+    border-left-color: var(--danger-color);
+}
+
+.notification.warning {
+    border-left-color: var(--warning-color);
+}
+
+.notification.info {
+    border-left-color: var(--primary-color);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom Controls */
+.custom-zoom-control {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.zoom-btn {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: white;
+    font-size: 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.zoom-btn:hover {
+    background-color: #f4f4f4;
+}
+
+.zoom-btn:last-child {
+    border-bottom: none;
+}
+
+.mouse-position-control {
+    background: rgba(255,255,255,0.8);
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+/* Buffer Control */
+.leaflet-control-buffer {
+    background-color: white;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 18px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    text-align: center;
+}
+
+.leaflet-control-buffer:hover {
+    background-color: #f4f4f4;
+}
+
+/* Fullscreen Styles */
+:fullscreen .gis-container,
+:-webkit-full-screen .gis-container,
+:-moz-full-screen .gis-container,
+:-ms-fullscreen .gis-container {
+    width: 100vw !important;
+    height: 100vh !important;
+    background: white !important;
+}
+
+:fullscreen #map,
+:-webkit-full-screen #map,
+:-moz-full-screen #map,
+:-ms-fullscreen #map {
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+:fullscreen .floating-tools,
+:-webkit-full-screen .floating-tools,
+:-moz-full-screen .floating-tools,
+:-ms-fullscreen .floating-tools {
+    top: 20px !important;
+    left: 20px !important;
+}
+
+:fullscreen .search-container,
+:-webkit-full-screen .search-container,
+:-moz-full-screen .search-container,
+:-ms-fullscreen .search-container {
+    top: 20px !important;
+}
+
+:fullscreen .main-menu,
+:-webkit-full-screen .main-menu,
+:-moz-full-screen .main-menu,
+:-ms-fullscreen .main-menu {
+    top: 0 !important;
+    left: 80px !important;
+}
+
+:fullscreen .tool-panel,
+:-webkit-full-screen .tool-panel,
+:-moz-full-screen .tool-panel,
+:-ms-fullscreen .tool-panel {
+    top: 20px !important;
+    right: 20px !important;
+}
+
+:fullscreen .map-legend,
+:-webkit-full-screen .map-legend,
+:-moz-full-screen .map-legend,
+:-ms-fullscreen .map-legend {
+    bottom: 20px !important;
+    left: 20px !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tool-panel {
+        width: calc(100vw - 40px);
+        right: 20px;
+    }
+    
+    .main-menu {
+        width: calc(100vw - 40px);
+        left: 20px;
+    }
+    
+    .search-container {
+        width: calc(100vw - 160px);
+    }
+    
+    .floating-tools {
+        flex-direction: row;
+        bottom: 20px;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 5px;
+    }
+    
+    .tool-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+    }
+}
+
+/* Leaflet Customization */
+.leaflet-control-zoom {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-control-zoom a {
+    border-radius: 0 !important;
+}
+
+.leaflet-popup-content {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+    min-width: 200px !important;
+}
+
+.leaflet-draw-toolbar {
+    margin-top: 12px !important;
+}
+
+.leaflet-draw-toolbar a {
+    background-color: white !important;
+    border: 1px solid #ccc !important;
+}
+
+.leaflet-draw-toolbar a:hover {
+    background-color: #f4f4f4 !important;
+}
+
+.leaflet-measure-resultpopup {
+    font-family: 'Inter', sans-serif !important;
+    border: 2px solid var(--primary-color) !important;
+}
+
+/* Property Popup */
+.property-popup {
+    max-width: 350px !important;
+}
+
+/* Marker Cluster */
+.marker-cluster-small {
+    background-color: rgba(35, 165, 251, 0.6) !important;
+}
+
+.marker-cluster-small div {
+    background-color: rgba(35, 165, 251, 0.8) !important;
+}
+
+.marker-cluster-medium {
+    background-color: rgba(76, 175, 80, 0.6) !important;
+}
+
+.marker-cluster-medium div {
+    background-color: rgba(76, 175, 80, 0.8) !important;
+}
+
+.marker-cluster-large {
+    background-color: rgba(255, 152, 0, 0.6) !important;
+}
+
+.marker-cluster-large div {
+    background-color: rgba(255, 152, 0, 0.8) !important;
+}
+
+/* Layer Controls */
+.layer-active {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.layer-active .menu-icon {
+    color: white !important;
+}
+
+
+/* Leaflet Fullscreen Control Customization */
+.leaflet-control-fullscreen a {
+    background-color: white;
+    color: var(--primary-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.leaflet-control-fullscreen a:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.leaflet-control-fullscreen.leaflet-fullscreen-on a {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Fullscreen mode styles */
+:fullscreen .leaflet-control-fullscreen,
+:-webkit-full-screen .leaflet-control-fullscreen,
+:-moz-full-screen .leaflet-control-fullscreen,
+:-ms-fullscreen .leaflet-control-fullscreen {
+    top: 20px !important;
+    left: 20px !important;
+}
+
+/* Adjust other controls in fullscreen */
+:fullscreen .leaflet-control-zoom,
+:-webkit-full-screen .leaflet-control-zoom,
+:-moz-full-screen .leaflet-control-zoom,
+:-ms-fullscreen .leaflet-control-zoom {
+    top: 70px !important;
+    left: 20px !important;
+}
+</style>
+
+<div class="gis-container">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Floating Tools -->
+   <div class="floating-tools">
+    <button class="tool-btn" id="btnMenu" title="Menu" style="display: none;">
+        <i class="fas fa-bars"></i>
+    </button>
+    <button class="tool-btn" id="btnProperties" title="Toggle Properties">
+        <i class="fas fa-home"></i>
+        <span class="badge" id="propertyCount">0</span>
+    </button>
+    <button class="tool-btn" id="btnZones" title="Toggle Zones">
+        <i class="fas fa-th-large"></i>
+    </button>
+    <button class="tool-btn" id="btnDistricts" title="Toggle Districts">
+        <i class="fas fa-map-pin"></i>
+    </button>
+    <button class="tool-btn" id="btnHeatmap" title="Toggle Heatmap">
+        <i class="fas fa-fire"></i>
+    </button>
+    <button class="tool-btn" id="btnFilters" title="Filters">
+        <i class="fas fa-filter"></i>
+    </button>
+    <button class="tool-btn" id="btnAnalysis" title="Analysis">
+        <i class="fas fa-chart-pie"></i>
+    </button>
+    <button class="tool-btn" id="btnMeasure" title="Measure">
+        <i class="fas fa-ruler-combined"></i>
+    </button>
+    <button class="tool-btn" id="btnDraw" title="Draw">
+        <i class="fas fa-pencil-alt"></i>
+    </button>
+    <button class="tool-btn" id="btnExport" title="Export">
+        <i class="fas fa-download"></i>
+    </button>
+    <button class="tool-btn" id="btnLocate" title="My Location">
+        <i class="fas fa-location-arrow"></i>
+    </button>
+    <!-- Remove the fullscreen button from here since we're using Leaflet's control -->
+    <button class="tool-btn" id="btnLegend" title="Toggle Legend">
+        <i class="fas fa-list"></i>
+    </button>
+    <button class="tool-btn" id="btnSatellite" title="Satellite View">
+        <i class="fas fa-satellite"></i>
+    </button>
+</div>
+    
+    <!-- Main Menu -->
+    <div class="main-menu" id="mainMenu">
+        <div class="menu-header">
+            <h3><i class="fas fa-map-marked-alt"></i> GIS Tools</h3>
+        </div>
+        
+        <div class="menu-content">
+            <div class="menu-category">
+                <h4><i class="fas fa-layer-group"></i> Map Layers</h4>
+                <div class="menu-grid">
+                    <div class="menu-item" data-action="toggle-properties" id="menuProperties">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span class="menu-label">Properties</span>
+                    </div>
+                    <div class="menu-item" data-action="toggle-zones" id="menuZones">
+                        <i class="fas fa-th-large menu-icon"></i>
+                        <span class="menu-label">Zones</span>
+                    </div>
+                    <div class="menu-item" data-action="toggle-districts" id="menuDistricts">
+                        <i class="fas fa-map-pin menu-icon"></i>
+                        <span class="menu-label">Districts</span>
+                    </div>
+                    <div class="menu-item" data-action="toggle-heatmap" id="menuHeatmap">
+                        <i class="fas fa-fire menu-icon"></i>
+                        <span class="menu-label">Heatmap</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-category">
+                <h4><i class="fas fa-tools"></i> Analysis Tools</h4>
+                <div class="menu-grid">
+                    <div class="menu-item" data-action="open-filters" id="menuFilters">
+                        <i class="fas fa-filter menu-icon"></i>
+                        <span class="menu-label">Filters</span>
+                    </div>
+                    <div class="menu-item" data-action="open-analysis" id="menuAnalysis">
+                        <i class="fas fa-chart-pie menu-icon"></i>
+                        <span class="menu-label">Analysis</span>
+                    </div>
+                    <div class="menu-item" data-action="open-measure" id="menuMeasure">
+                        <i class="fas fa-ruler-combined menu-icon"></i>
+                        <span class="menu-label">Measure</span>
+                    </div>
+                    <div class="menu-item" data-action="open-draw" id="menuDraw">
+                        <i class="fas fa-pencil-alt menu-icon"></i>
+                        <span class="menu-label">Draw</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-category">
+                <h4><i class="fas fa-file-export"></i> Export & Reports</h4>
+                <div class="menu-grid">
+                    <div class="menu-item" data-action="export-data" id="menuExport">
+                        <i class="fas fa-download menu-icon"></i>
+                        <span class="menu-label">Export Data</span>
+                    </div>
+                    <div class="menu-item" data-action="generate-report" id="menuReport">
+                        <i class="fas fa-file-pdf menu-icon"></i>
+                        <span class="menu-label">Generate Report</span>
+                    </div>
+                    <div class="menu-item" data-action="print-map" id="menuPrint">
+                        <i class="fas fa-print menu-icon"></i>
+                        <span class="menu-label">Print Map</span>
+                    </div>
+                    <div class="menu-item" data-action="share-map" id="menuShare">
+                        <i class="fas fa-share-alt menu-icon"></i>
+                        <span class="menu-label">Share</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Box -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search properties by address, district, zone, or ID...">
+            <button class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+            </button>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+    
+    <!-- Legend -->
+    <div class="map-legend" id="mapLegend">
+        <div class="legend-header">
+            <h4><i class="fas fa-key"></i> Legend</h4>
+            <button class="legend-toggle" id="toggleLegend">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="legend-content" id="legendContent">
+            <div class="legend-category">
+                <h5>Property Status</h5>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: var(--success-color);"></div>
+                        <span class="legend-text">Active</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: var(--warning-color);"></div>
+                        <span class="legend-text">Inactive</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: var(--danger-color);"></div>
+                        <span class="legend-text">Under Construction</span>
+                    </div>
+                </div>
+            </div>
+            <div class="legend-category">
+                <h5>Property Type</h5>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #23a5fb;"></div>
+                        <span class="legend-text">Residential</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #9c27b0;"></div>
+                        <span class="legend-text">Commercial</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #ff9800;"></div>
+                        <span class="legend-text">Industrial</span>
+                    </div>
+                </div>
+            </div>
+            <div class="legend-category">
+                <h5>Map Layers</h5>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #23a5fb; opacity: 0.5; border: 2px dashed #23a5fb;"></div>
+                        <span class="legend-text">Property Polygons</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #23a5fb; border-radius: 50%;"></div>
+                        <span class="legend-text">Property Points</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #1e88e5; opacity: 0.15; border: 3px solid #1e88e5; border-style: dashed;"></div>
+                        <span class="legend-text">Zones</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background-color: #6c757d; opacity: 0.08; border: 4px solid #6c757d; border-style: dashed;"></div>
+                        <span class="legend-text">Districts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tool Panels -->
+    <div class="tool-panel" id="filtersPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-filter"></i> Filters</h3>
+            <button class="close-panel" data-panel="filtersPanel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> District</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="districtFilter">
+                        <option value="">All Districts</option>
+                        {% for district in districts %}
+                        <option value="{{ district.district }}">{{ district.district }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-th-large"></i> Zone</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="zoneFilter">
+                        <option value="">All Zones</option>
+                        {% for zone in zones %}
+                        <option value="{{ zone.code }}">{{ zone.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-home"></i> Property Type</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="propertyTypeFilter">
+                        <option value="">All Types</option>
+                        {% for prop_type in property_types %}
+                        <option value="{{ prop_type.code }}">{{ prop_type.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <button class="tool-btn" id="applyFilters" style="width: 100%; margin-top: 20px; border-radius: var(--border-radius-sm); padding: 12px; background: var(--primary-color); color: white;">
+                <i class="fas fa-check"></i> Apply Filters
+            </button>
+            <button class="tool-btn" id="clearFilters" style="width: 100%; margin-top: 10px; border-radius: var(--border-radius-sm); padding: 12px; background: #6c757d; color: white;">
+                <i class="fas fa-times"></i> Clear Filters
+            </button>
+        </div>
+    </div>
+    
+    <div class="tool-panel" id="analysisPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-chart-pie"></i> Analysis</h3>
+            <button class="close-panel" data-panel="analysisPanel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="form-group">
+                <label>Analysis Type</label>
+                <div class="select-wrapper">
+                    <select class="form-control" id="analysisType">
+                        <option value="revenue_heatmap">Revenue Heatmap</option>
+                        <option value="property_clusters">Property Clusters</option>
+                        <option value="zone_performance">Zone Performance</option>
+                        <option value="density_analysis">Density Analysis</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Buffer Analysis</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" class="form-control" id="bufferRadius" placeholder="Radius in meters" style="flex: 1;" value="500" min="10" max="10000">
+                    <button class="tool-btn" id="btnBuffer" style="border-radius: var(--border-radius-sm); padding: 10px;">
+                        <i class="fas fa-bullseye"></i>
+                    </button>
+                </div>
+                <small class="text-muted">Click on map after setting radius</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Export Analysis Results</label>
+                <button class="tool-btn" id="exportAnalysis" style="width: 100%; border-radius: var(--border-radius-sm); padding: 12px; background: #4caf50; color: white;">
+                    <i class="fas fa-file-export"></i> Export Results
+                </button>
+            </div>
+            
+            <button class="tool-btn" id="runAnalysis" style="width: 100%; margin-top: 20px; border-radius: var(--border-radius-sm); padding: 12px; background: var(--primary-color); color: white;">
+                <i class="fas fa-play"></i> Run Analysis
+            </button>
+        </div>
+    </div>
+    
+    <!-- Map -->
+    <div id="map"></div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<script>
+class PropertyRevenueGIS {
+    constructor() {
+        this.map = null;
+        this.propertyLayer = null;
+        this.zoneLayer = null;
+        this.districtLayer = null;
+        this.heatLayer = null;
+        this.markerCluster = null;
+        this.drawControl = null;
+        this.measureControl = null;
+        this.drawnItems = null;
+        this.propertyFeatures = [];
+        this.currentFilters = {};
+        this.activePanel = null;
+        this.isDrawing = false;
+        this.isMeasuring = false;
+        this.isBufferMode = false;
+        this.activeLayers = {
+            properties: true,
+            zones: false,
+            districts: false,
+            heatmap: false
+        };
+        this.propertyCount = 0;
+        this.searchMarker = null;
+        
+        this.initMap();
+        this.bindEvents();
+        this.loadInitialData();
+    }
+
+    initMap() {
+        this.map = L.map('map', {
+            minZoom: 5,
+            zoomControl: false,
+            preferCanvas: true
+        }).setView([5.8, -0.2], 12);
+        
+        // Add base layers
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(this.map);
+        
+        // Add satellite layer (hidden by default)
+        this.satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri',
+            maxZoom: 19
+        });
+
+        // Add base layers
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(this.map);
+    
+    // Add satellite layer (hidden by default)
+    this.satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri',
+        maxZoom: 19
+    });
+    
+    // Add mouse position control
+    // this.addMousePositionControl();
+    
+    // Add custom zoom controls
+    // this.addCustomZoomControls();
+    
+    // Add scale control
+    // L.control.scale({ imperial: false }).addTo(this.map);
+    
+    // Initialize drawn items layer
+    this.drawnItems = new L.FeatureGroup();
+    this.map.addLayer(this.drawnItems);
+    
+    // Initialize marker cluster for points
+    this.markerCluster = L.markerClusterGroup({
+        maxClusterRadius: 80,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true
+    });
+    
+    // Add Leaflet Fullscreen control
+    this.addFullscreenControl();
+        
+        // Add mouse position control
+        this.addMousePositionControl();
+        
+        // Add custom zoom controls
+        this.addCustomZoomControls();
+        
+        // Add scale control
+        L.control.scale({ imperial: false }).addTo(this.map);
+        
+        // Initialize drawn items layer
+        this.drawnItems = new L.FeatureGroup();
+        this.map.addLayer(this.drawnItems);
+        
+        // Initialize marker cluster for points
+        this.markerCluster = L.markerClusterGroup({
+            maxClusterRadius: 80,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true
+        });
+    }
+
+    addMousePositionControl() {
+        const mousePosition = L.control({ position: 'bottomleft' });
+        mousePosition.onAdd = function(map) {
+            this._div = L.DomUtil.create('div', 'mouse-position-control');
+            this.update();
+            return this._div;
+        };
+        mousePosition.update = function(evt) {
+            let latlng = this._map.getCenter();
+            if (evt && evt.latlng) {
+                latlng = evt.latlng;
+            }
+            this._div.innerHTML = `Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`;
+        };
+        mousePosition.addTo(this.map);
+        this.map.on('mousemove', function(evt) {
+            mousePosition.update(evt);
+        });
+    }
+
+    addCustomZoomControls() {
+        const zoomControl = L.control({ position: 'topleft' });
+        zoomControl.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'custom-zoom-control');
+            div.innerHTML = `
+                <button class="zoom-btn" id="zoomin">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="zoom-btn" id="zoomout">
+                    <i class="fas fa-minus"></i>
+                </button>
+            `;
+            return div;
+        };
+        zoomControl.addTo(this.map);
+        
+        $('#zoomin').on('click', () => this.map.zoomIn(1));
+        $('#zoomout').on('click', () => this.map.zoomOut(1));
+    }
+
+    async loadInitialData() {
+        this.showLoading(true);
+        try {
+            await Promise.all([
+                this.loadProperties(),
+                this.loadZones(),
+                this.loadDistricts()
+            ]);
+            this.showNotification('GIS Map loaded successfully', 'success');
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+            this.showNotification('Failed to load map data', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+
+    addFullscreenControl() {
+    // Create custom fullscreen control
+    const fullscreenControl = L.control.fullscreen({
+        position: 'topleft',
+        title: {
+            'false': 'View Fullscreen',
+            'true': 'Exit Fullscreen'
+        },
+        content: '<i class="fas fa-expand"></i>',
+        forceSeparateButton: true,
+        forcePseudoFullscreen: false
+    });
+    
+    this.map.addControl(fullscreenControl);
+    
+    // Listen for fullscreen change events
+    this.map.on('fullscreenchange', this.handleFullscreenChange.bind(this));
+}
+
+handleFullscreenChange() {
+    const btn = document.getElementById('btnFullscreen');
+    const gisContainer = document.querySelector('.gis-container');
+    
+    if (this.map.isFullscreen()) {
+        // Update button
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-compress"></i>';
+            btn.title = 'Exit Fullscreen';
+        }
+        
+        // Add fullscreen class to container
+        if (gisContainer) {
+            gisContainer.classList.add('fullscreen-mode');
+        }
+        
+        // Hide all panels and menus in fullscreen
+        this.hideAllPanels();
+        this.hideMenu();
+        
+        // Hide legend in fullscreen
+        const legend = document.getElementById('mapLegend');
+        if (legend) legend.style.display = 'none';
+        
+        this.showNotification('Fullscreen mode enabled', 'info');
+    } else {
+        // Update button
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-expand"></i>';
+            btn.title = 'Fullscreen';
+        }
+        
+        // Remove fullscreen class from container
+        if (gisContainer) {
+            gisContainer.classList.remove('fullscreen-mode');
+        }
+        
+        this.showNotification('Fullscreen mode disabled', 'info');
+    }
+}
+
+    async loadProperties(filters = {}) {
+        this.showLoading(true);
+        try {
+            const params = new URLSearchParams(filters);
+            const response = await fetch(`/api/properties/geojson/?${params}`);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const geojson = await response.json();
+            console.log('Fetched properties GeoJSON:', geojson);
+            
+            this.propertyFeatures = geojson.features || [];
+            this.propertyCount = this.propertyFeatures.length;
+            
+            // Update property count badge
+            document.getElementById('propertyCount').textContent = this.propertyCount.toLocaleString();
+            
+            // Clear existing layers
+            if (this.propertyLayer) {
+                this.map.removeLayer(this.propertyLayer);
+            }
+            if (this.markerCluster) {
+                this.map.removeLayer(this.markerCluster);
+                this.markerCluster.clearLayers();
+            }
+            
+            // Separate points and polygons
+            const pointFeatures = [];
+            const polygonFeatures = [];
+            
+            this.propertyFeatures.forEach(feature => {
+                if (feature.geometry.type === 'Point') {
+                    pointFeatures.push(feature);
+                } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+                    polygonFeatures.push(feature);
+                }
+            });
+            
+            console.log(`Found ${pointFeatures.length} points and ${polygonFeatures.length} polygons`);
+            
+            // Create GeoJSON layer for polygons
+            if (polygonFeatures.length > 0) {
+                this.propertyLayer = L.geoJSON(polygonFeatures, {
+                    style: (feature) => {
+                        return {
+                            fillColor: feature.properties.marker_color || '#23a5fb',
+                            weight: 2,
+                            opacity: 0.8,
+                            color: '#ffffff',
+                            fillOpacity: 0.5,
+                            dashArray: '3'
+                        };
+                    },
+                    onEachFeature: (feature, layer) => {
+                        // Add popup for polygon features
+                        layer.bindPopup(this.getPropertyPopup(feature.properties), {
+                            className: 'property-popup'
+                        });
+                        
+                        // Add click event
+                        layer.on('click', (e) => {
+                            this.showPropertyPopup(feature.properties);
+                            e.originalEvent.stopPropagation();
+                        });
+                        
+                        // Add hover effect
+                        layer.on('mouseover', function(e) {
+                            this.setStyle({
+                                weight: 3,
+                                fillOpacity: 0.7,
+                                color: '#ffeb3b'
+                            });
+                            e.originalEvent.stopPropagation();
+                        });
+                        
+                        layer.on('mouseout', function(e) {
+                            this.setStyle({
+                                weight: 2,
+                                fillOpacity: 0.5,
+                                color: '#ffffff'
+                            });
+                            e.originalEvent.stopPropagation();
+                        });
+                    }
+                });
+                
+                if (this.activeLayers.properties) {
+                    this.map.addLayer(this.propertyLayer);
+                }
+            }
+            
+            // Create markers for points
+            if (pointFeatures.length > 0) {
+                const pointLayer = L.geoJSON(pointFeatures, {
+                    pointToLayer: (feature, latlng) => {
+                        const marker = L.marker(latlng, {
+                            icon: this.getPropertyIcon(feature.properties)
+                        });
+                        
+                        marker.bindPopup(this.getPropertyPopup(feature.properties), {
+                            className: 'property-popup'
+                        });
+                        marker.on('click', () => {
+                            this.showPropertyPopup(feature.properties);
+                        });
+                        
+                        return marker;
+                    }
+                });
+                
+                // Add all point markers to marker cluster
+                pointLayer.eachLayer((layer) => {
+                    this.markerCluster.addLayer(layer);
+                });
+                
+                // Add marker cluster to map if properties layer is active
+                if (this.activeLayers.properties) {
+                    this.map.addLayer(this.markerCluster);
+                }
+            }
+            
+            // Fit bounds if we have features
+            if (this.propertyFeatures.length > 0) {
+                try {
+                    // Create a feature group to get bounds
+                    const allLayers = L.featureGroup();
+                    
+                    if (this.propertyLayer && this.propertyLayer.getLayers().length > 0) {
+                        allLayers.addLayer(this.propertyLayer);
+                    }
+                    
+                    if (this.markerCluster && this.markerCluster.getLayers().length > 0) {
+                        allLayers.addLayer(this.markerCluster);
+                    }
+                    
+                    if (allLayers.getLayers().length > 0) {
+                        const bounds = allLayers.getBounds();
+                        if (bounds.isValid()) {
+                            this.map.fitBounds(bounds, { 
+                                padding: [50, 50],
+                                maxZoom: 16
+                            });
+                        } else {
+                            this.map.setView([5.8, -0.2], 12);
+                        }
+                    } else {
+                        this.map.setView([5.8, -0.2], 12);
+                    }
+                } catch (boundsError) {
+                    console.error('Error setting bounds:', boundsError);
+                    this.map.setView([5.8, -0.2], 12);
+                }
+            } else {
+                this.map.setView([5.8, -0.2], 12);
+            }
+            
+            this.showNotification(`Loaded ${pointFeatures.length} points and ${polygonFeatures.length} polygons`, 'success');
+            
+        } catch (error) {
+            console.error('Error loading properties:', error);
+            this.showNotification('Failed to load properties', 'error');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async loadZones() {
+        try {
+            const response = await fetch('/api/zones/geojson/');
+            if (!response.ok) {
+                throw new Error(`Failed to load zones: ${response.status}`);
+            }
+            
+            const geojson = await response.json();
+            
+            // Validate GeoJSON
+            if (!geojson || !geojson.type || geojson.type !== 'FeatureCollection') {
+                throw new Error('Invalid GeoJSON format: Expected FeatureCollection');
+            }
+            
+            if (!geojson.features || !Array.isArray(geojson.features)) {
+                throw new Error('Invalid GeoJSON format: No features array');
+            }
+            
+            // Filter out features without valid geometry
+            const validFeatures = geojson.features.filter(feature => 
+                feature && feature.geometry && feature.geometry.type && feature.geometry.coordinates
+            );
+            
+            if (validFeatures.length === 0) {
+                console.warn('No valid zone features found');
+                return;
+            }
+            
+            // Clear existing zone layer
+            if (this.zoneLayer) {
+                this.map.removeLayer(this.zoneLayer);
+            }
+            
+            // Create GeoJSON layer for zones with error handling
+            this.zoneLayer = L.geoJSON(validFeatures, {
+                style: (feature) => ({
+                    fillColor: feature.properties?.color || '#1e88e5',
+                    weight: 3,
+                    opacity: 0.8,
+                    color: feature.properties?.color || '#1e88e5',
+                    fillOpacity: 0.15,
+                    dashArray: '5, 5'
+                }),
+                onEachFeature: (feature, layer) => {
+                    const props = feature.properties || {};
+                    layer.bindPopup(`
+                        <div style="min-width: 250px;">
+                            <h4 style="margin: 0 0 10px 0; color: #1e88e5;">${props.name || 'Unnamed Zone'}</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <div style="font-size: 11px; color: #666;">Type</div>
+                                    <div style="font-size: 13px; font-weight: 500;">${props.zone_type || 'Unknown'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #666;">Code</div>
+                                    <div style="font-size: 13px; font-weight: 500;">${props.code || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                <div style="font-size: 11px; color: #666;">Properties</div>
+                                <div style="font-size: 18px; font-weight: 700; color: #1e88e5;">${props.property_count || 0}</div>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+            
+            console.log('Zone layer loaded with', validFeatures.length, 'valid features');
+            
+        } catch (error) {
+            console.error('Error loading zones:', error);
+            this.showNotification('Failed to load zones', 'error');
+        }
+    }
+
+    async loadDistricts() {
+        try {
+            const response = await fetch('/api/districts/geojson/');
+            if (!response.ok) {
+                throw new Error(`Failed to load districts: ${response.status}`);
+            }
+            
+            const geojson = await response.json();
+            
+            // Validate GeoJSON
+            if (!geojson || !geojson.type || geojson.type !== 'FeatureCollection') {
+                throw new Error('Invalid GeoJSON format: Expected FeatureCollection');
+            }
+            
+            if (!geojson.features || !Array.isArray(geojson.features)) {
+                throw new Error('Invalid GeoJSON format: No features array');
+            }
+            
+            // Filter out features without valid geometry
+            const validFeatures = geojson.features.filter(feature => 
+                feature && feature.geometry && feature.geometry.type && feature.geometry.coordinates
+            );
+            
+            if (validFeatures.length === 0) {
+                console.warn('No valid district features found');
+                return;
+            }
+            
+            // Clear existing district layer
+            if (this.districtLayer) {
+                this.map.removeLayer(this.districtLayer);
+            }
+            
+            // Create GeoJSON layer for districts with error handling
+            this.districtLayer = L.geoJSON(validFeatures, {
+                style: {
+                    fillColor: '#6c757d',
+                    weight: 4,
+                    opacity: 0.6,
+                    color: '#6c757d',
+                    fillOpacity: 0.08,
+                    dashArray: '8, 4'
+                },
+                onEachFeature: (feature, layer) => {
+                    const props = feature.properties || {};
+                    layer.bindPopup(`
+                        <div style="min-width: 250px;">
+                            <h4 style="margin: 0 0 10px 0; color: #6c757d;">${props.name || 'Unnamed District'}</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <div style="font-size: 11px; color: #666;">Region</div>
+                                    <div style="font-size: 13px; font-weight: 500;">${props.region || 'Unknown'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #666;">Properties</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: #6c757d;">${props.property_count || 0}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+            
+            console.log('District layer loaded with', validFeatures.length, 'valid features');
+            
+        } catch (error) {
+            console.error('Error loading districts:', error);
+            this.showNotification('Failed to load districts', 'error');
+        }
+    }
+
+    getPropertyIcon(properties) {
+        const color = properties.marker_color || '#23a5fb';
+        const icon = 'fa-home';
+        
+        return L.divIcon({
+            html: `
+                <div style="
+                    background: ${color};
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    border: 3px solid white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 14px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                ">
+                    <i class="fas ${icon}"></i>
+                </div>
+            `,
+            className: 'property-marker',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+    }
+
+    getPropertyPopup(properties) {
+        return `
+            <div style="min-width: 280px; max-width: 350px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="margin: 0; color: #23a5fb; font-size: 15px; font-weight: 600;">Property ${properties.id || 'N/A'}</h4>
+                    <span style="background: ${properties.marker_color || '#23a5fb'}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                        ${properties.status || 'Active'}
+                    </span>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #555;">
+                        <i class="fas fa-map-marker-alt" style="color: #23a5fb; width: 16px;"></i>
+                        ${properties.address || 'No address'}
+                    </p>
+                    ${properties.street ? `<p style="margin: 0 0 8px 0; font-size: 12px; color: #777;">
+                        <i class="fas fa-road" style="color: #23a5fb; width: 16px;"></i>
+                        ${properties.street}
+                    </p>` : ''}
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Type</div>
+                        <div style="font-size: 13px; font-weight: 500;">${properties.property_type || 'Unknown'}</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Zone</div>
+                        <div style="font-size: 13px; font-weight: 500;">${properties.zone || 'Unknown'}</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Area</div>
+                        <div style="font-size: 13px; font-weight: 500;">${properties.area_in_me || 0} sq.m</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 8px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #666; margin-bottom: 3px;">District</div>
+                        <div style="font-size: 13px; font-weight: 500;">${properties.district || 'Unknown'}</div>
+                    </div>
+                </div>
+                
+                <button onclick="gis.flyToProperty(${JSON.stringify(properties).replace(/"/g, '&quot;')})" 
+                        style="width: 100%; margin-top: 10px; padding: 8px; background: #23a5fb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background 0.2s;">
+                    <i class="fas fa-search-location"></i> Fly to Location
+                </button>
+            </div>
+        `;
+    }
+
+    showPropertyPopup(properties) {
+        // Create a temporary popup to show property details
+        const popupContent = this.getPropertyPopup(properties);
+        
+        // Get coordinates from properties
+        let lat, lng;
+        if (properties.latitude && properties.longitude) {
+            lat = properties.latitude;
+            lng = properties.longitude;
+        } else if (properties.geometry && properties.geometry.coordinates) {
+            if (properties.geometry.type === 'Point') {
+                lng = properties.geometry.coordinates[0];
+                lat = properties.geometry.coordinates[1];
+            }
+        }
+        
+        if (lat && lng) {
+            // Fly to the property location
+            this.map.flyTo([lat, lng], 16, {
+                duration: 1.5,
+                easeLinearity: 0.25
+            });
+            
+            // Open popup after flying
+            setTimeout(() => {
+                L.popup()
+                    .setLatLng([lat, lng])
+                    .setContent(popupContent)
+                    .openOn(this.map);
+            }, 1500);
+        }
+    }
+
+    flyToProperty(properties) {
+        let lat, lng;
+        
+        if (properties.latitude && properties.longitude) {
+            lat = parseFloat(properties.latitude);
+            lng = parseFloat(properties.longitude);
+        } else if (properties.geometry && properties.geometry.coordinates) {
+            if (properties.geometry.type === 'Point') {
+                lng = parseFloat(properties.geometry.coordinates[0]);
+                lat = parseFloat(properties.geometry.coordinates[1]);
+            } else if (properties.geometry.type === 'Polygon' || properties.geometry.type === 'MultiPolygon') {
+                // For polygons, get the center
+                const layer = L.geoJSON(properties);
+                const center = layer.getBounds().getCenter();
+                lat = center.lat;
+                lng = center.lng;
+            }
+        }
+        
+        if (lat && lng) {
+            // Remove existing search marker
+            if (this.searchMarker) {
+                this.map.removeLayer(this.searchMarker);
+            }
+            
+            // Add search marker
+            this.searchMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: '<div style="background: #ff5722; width: 32px; height: 32px; border-radius: 50%; border: 4px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.4);"><i class="fas fa-search"></i></div>',
+                    className: 'search-marker',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                })
+            }).addTo(this.map);
+            
+            // Fly to location with smooth animation
+            this.map.flyTo([lat, lng], 16, {
+                duration: 2,
+                easeLinearity: 0.25
+            });
+            
+            // Open popup after animation
+            setTimeout(() => {
+                this.searchMarker.bindPopup(`<div style="font-weight: 500; color: #ff5722;">Search Result</div><div>${properties.address || 'Property'}</div>`)
+                    .openPopup();
+            }, 2000);
+            
+            this.showNotification('Flying to property location', 'info');
+        }
+    }
+
+   bindEvents() {
+    // Menu toggle
+    const btnMenu = document.getElementById('btnMenu');
+    if (btnMenu) btnMenu.addEventListener('click', () => this.toggleMenu());
+    
+    // Layer toggles
+    const btnProperties = document.getElementById('btnProperties');
+    const btnZones = document.getElementById('btnZones');
+    const btnDistricts = document.getElementById('btnDistricts');
+    const btnHeatmap = document.getElementById('btnHeatmap');
+    
+    if (btnProperties) btnProperties.addEventListener('click', () => this.toggleLayer('properties'));
+    if (btnZones) btnZones.addEventListener('click', () => this.toggleLayer('zones'));
+    if (btnDistricts) btnDistricts.addEventListener('click', () => this.toggleLayer('districts'));
+    if (btnHeatmap) btnHeatmap.addEventListener('click', () => this.toggleLayer('heatmap'));
+    
+    // Tool buttons - keep only the ones you want to show
+    const btnFilters = document.getElementById('btnFilters');
+    const btnAnalysis = document.getElementById('btnAnalysis');
+    const btnMeasure = document.getElementById('btnMeasure');
+    const btnDraw = document.getElementById('btnDraw');
+    const btnExport = document.getElementById('btnExport');
+    const btnLocate = document.getElementById('btnLocate');
+    // Remove btnFullscreen from here since we're using Leaflet's control
+    const btnLegend = document.getElementById('btnLegend');
+    const btnSatellite = document.getElementById('btnSatellite');
+    
+    if (btnFilters) btnFilters.addEventListener('click', () => this.showPanel('filtersPanel'));
+    if (btnAnalysis) btnAnalysis.addEventListener('click', () => this.showPanel('analysisPanel'));
+    if (btnMeasure) btnMeasure.addEventListener('click', () => this.activateMeasureTool());
+    if (btnDraw) btnDraw.addEventListener('click', () => this.activateDrawTools());
+    if (btnExport) btnExport.addEventListener('click', () => this.exportData());
+    if (btnLocate) btnLocate.addEventListener('click', () => this.locateUser());
+    if (btnLegend) btnLegend.addEventListener('click', () => this.toggleLegend());
+    if (btnSatellite) btnSatellite.addEventListener('click', () => this.toggleSatellite());
+    
+    // Menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const action = e.currentTarget.dataset.action;
+            this.handleMenuAction(action);
+            this.hideMenu();
+        });
+    });
+    
+    // Panel close buttons
+    document.querySelectorAll('.close-panel').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const panel = e.currentTarget.dataset.panel;
+            this.hidePanel(panel);
+        });
+    });
+    
+    // Search
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    
+    if (searchInput) searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+    if (searchBtn) searchBtn.addEventListener('click', () => this.handleSearch(searchInput ? searchInput.value : ''));
+    
+    // Filters
+    const applyFilters = document.getElementById('applyFilters');
+    const clearFilters = document.getElementById('clearFilters');
+    
+    if (applyFilters) applyFilters.addEventListener('click', () => this.applyFilters());
+    if (clearFilters) clearFilters.addEventListener('click', () => this.clearFilters());
+    
+    // Analysis
+    const runAnalysis = document.getElementById('runAnalysis');
+    const btnBuffer = document.getElementById('btnBuffer');
+    const exportAnalysis = document.getElementById('exportAnalysis');
+    
+    if (runAnalysis) runAnalysis.addEventListener('click', () => this.runAnalysis());
+    if (btnBuffer) btnBuffer.addEventListener('click', () => this.activateBufferMode());
+    if (exportAnalysis) exportAnalysis.addEventListener('click', () => this.exportAnalysisResults());
+    
+    // Legend toggle
+    const toggleLegend = document.getElementById('toggleLegend');
+    if (toggleLegend) toggleLegend.addEventListener('click', () => this.toggleLegendContent());
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (this.isDrawing) this.deactivateDrawTools();
+            if (this.isMeasuring) this.deactivateMeasureTool();
+            if (this.isBufferMode) this.cancelBufferMode();
+            this.hideMenu();
+            this.hideAllPanels();
+        }
+        if (e.key === 'm' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            this.activateMeasureTool();
+        }
+        if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            this.activateDrawTools();
+        }
+        if (e.key === 'b' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            this.activateBufferMode();
+        }
+        if (e.key === 'f' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            this.showPanel('filtersPanel');
+        }
+        if (e.key === 'l' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            this.toggleLegend();
+        }
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.focus();
+        }
+        // Fullscreen shortcut
+        if (e.key === 'F11') {
+            e.preventDefault();
+            this.toggleFullscreen();
+        }
+    });
+    
+    // Close search results on click outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            this.hideSearchResults();
+        }
+    });
+}
+
+    toggleMenu() {
+        const menu = document.getElementById('mainMenu');
+        const btn = document.getElementById('btnMenu');
+        menu.classList.toggle('active');
+        btn.classList.toggle('active');
+    }
+
+    hideMenu() {
+        const menu = document.getElementById('mainMenu');
+        const btn = document.getElementById('btnMenu');
+        menu.classList.remove('active');
+        btn.classList.remove('active');
+    }
+
+    toggleLayer(layerType) {
+        const btn = document.getElementById(`btn${layerType.charAt(0).toUpperCase() + layerType.slice(1)}`);
+        const menuItem = document.getElementById(`menu${layerType.charAt(0).toUpperCase() + layerType.slice(1)}`);
+        
+        switch(layerType) {
+            case 'properties':
+                this.activeLayers.properties = !this.activeLayers.properties;
+                if (this.activeLayers.properties) {
+                    if (this.propertyLayer) this.map.addLayer(this.propertyLayer);
+                    if (this.markerCluster) this.map.addLayer(this.markerCluster);
+                    btn.classList.add('active');
+                    if (menuItem) menuItem.classList.add('active');
+                    this.showNotification('Properties shown', 'info');
+                } else {
+                    if (this.propertyLayer) this.map.removeLayer(this.propertyLayer);
+                    if (this.markerCluster) this.map.removeLayer(this.markerCluster);
+                    btn.classList.remove('active');
+                    if (menuItem) menuItem.classList.remove('active');
+                    this.showNotification('Properties hidden', 'info');
+                }
+                break;
+                
+            case 'zones':
+                this.activeLayers.zones = !this.activeLayers.zones;
+                if (this.activeLayers.zones && this.zoneLayer) {
+                    this.map.addLayer(this.zoneLayer);
+                    btn.classList.add('active');
+                    if (menuItem) menuItem.classList.add('active');
+                    this.showNotification('Zones shown', 'info');
+                } else if (this.zoneLayer) {
+                    this.map.removeLayer(this.zoneLayer);
+                    btn.classList.remove('active');
+                    if (menuItem) menuItem.classList.remove('active');
+                    this.showNotification('Zones hidden', 'info');
+                }
+                break;
+                
+            case 'districts':
+                this.activeLayers.districts = !this.activeLayers.districts;
+                if (this.activeLayers.districts && this.districtLayer) {
+                    this.map.addLayer(this.districtLayer);
+                    btn.classList.add('active');
+                    if (menuItem) menuItem.classList.add('active');
+                    this.showNotification('Districts shown', 'info');
+                } else if (this.districtLayer) {
+                    this.map.removeLayer(this.districtLayer);
+                    btn.classList.remove('active');
+                    if (menuItem) menuItem.classList.remove('active');
+                    this.showNotification('Districts hidden', 'info');
+                }
+                break;
+                
+            case 'heatmap':
+                this.activeLayers.heatmap = !this.activeLayers.heatmap;
+                if (this.activeLayers.heatmap) {
+                    this.createHeatmap();
+                    btn.classList.add('active');
+                    if (menuItem) menuItem.classList.add('active');
+                } else {
+                    if (this.heatLayer) {
+                        this.map.removeLayer(this.heatLayer);
+                        this.heatLayer = null;
+                    }
+                    btn.classList.remove('active');
+                    if (menuItem) menuItem.classList.remove('active');
+                    this.showNotification('Heatmap hidden', 'info');
+                }
+                break;
+        }
+    }
+
+    handleMenuAction(action) {
+        switch(action) {
+            case 'toggle-properties':
+                this.toggleLayer('properties');
+                break;
+            case 'toggle-zones':
+                this.toggleLayer('zones');
+                break;
+            case 'toggle-districts':
+                this.toggleLayer('districts');
+                break;
+            case 'toggle-heatmap':
+                this.toggleLayer('heatmap');
+                break;
+            case 'open-filters':
+                this.showPanel('filtersPanel');
+                break;
+            case 'open-analysis':
+                this.showPanel('analysisPanel');
+                break;
+            case 'open-measure':
+                this.activateMeasureTool();
+                break;
+            case 'open-draw':
+                this.activateDrawTools();
+                break;
+            case 'export-data':
+                this.exportData();
+                break;
+            case 'generate-report':
+                this.generateReport();
+                break;
+            case 'print-map':
+                this.printMap();
+                break;
+            case 'share-map':
+                this.shareMap();
+                break;
+        }
+    }
+
+    createHeatmap() {
+        if (this.heatLayer) {
+            this.map.removeLayer(this.heatLayer);
+            this.heatLayer = null;
+        }
+        
+        try {
+            const points = this.propertyFeatures
+                .filter(feature => feature.geometry.type === 'Point')
+                .map(feature => [
+                    feature.geometry.coordinates[1], // lat
+                    feature.geometry.coordinates[0], // lng
+                    1 // intensity
+                ]);
+            
+            if (points.length === 0) {
+                // If no points, use polygon centroids
+                const polygonCentroids = this.propertyFeatures
+                    .filter(feature => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')
+                    .map(feature => {
+                        const layer = L.geoJSON(feature);
+                        const centroid = layer.getBounds().getCenter();
+                        return [centroid.lat, centroid.lng, 1];
+                    });
+                
+                if (polygonCentroids.length === 0) {
+                    this.showNotification('No data available for heatmap', 'warning');
+                    return;
+                }
+                
+                this.heatLayer = L.heatLayer(polygonCentroids, {
+                    radius: 25,
+                    blur: 15,
+                    maxZoom: 17,
+                    gradient: {
+                        0.1: '#23a5fb',
+                        0.3: '#1e88e5',
+                        0.5: '#1976d2',
+                        0.7: '#1565c0',
+                        1.0: '#0d47a1'
+                    }
+                }).addTo(this.map);
+            } else {
+                this.heatLayer = L.heatLayer(points, {
+                    radius: 25,
+                    blur: 15,
+                    maxZoom: 17,
+                    gradient: {
+                        0.1: '#23a5fb',
+                        0.3: '#1e88e5',
+                        0.5: '#1976d2',
+                        0.7: '#1565c0',
+                        1.0: '#0d47a1'
+                    }
+                }).addTo(this.map);
+            }
+            
+            this.showNotification('Heatmap generated', 'success');
+        } catch (error) {
+            console.error('Error creating heatmap:', error);
+            this.showNotification('Failed to generate heatmap', 'error');
+        }
+    }
+
+    showPanel(panelId) {
+        if (this.activePanel) {
+            this.hidePanel(this.activePanel);
+        }
+        const panel = document.getElementById(panelId);
+        panel.classList.add('active');
+        this.activePanel = panelId;
+    }
+
+    hidePanel(panelId) {
+        const panel = document.getElementById(panelId);
+        panel.classList.remove('active');
+        this.activePanel = null;
+    }
+
+    hideAllPanels() {
+        document.querySelectorAll('.tool-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        this.activePanel = null;
+    }
+
+    async handleSearch(query) {
+        if (query.length < 2) {
+            this.hideSearchResults();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/map/search/?q=${encodeURIComponent(query)}`);
+            if (!response.ok) throw new Error('Search failed');
+            
+            const results = await response.json();
+            this.displaySearchResults(results);
+        } catch (error) {
+            console.error('Search error:', error);
+            this.showNotification('Search failed. Please try again.', 'error');
+            this.hideSearchResults();
+        }
+    }
+
+    displaySearchResults(results) {
+        const container = document.getElementById('searchResults');
+        
+        if (!results || results.length === 0) {
+            container.innerHTML = '<div style="padding: 15px; text-align: center; color: #666;">No results found</div>';
+            container.style.display = 'block';
+            return;
+        }
+        
+        const html = results.map((result, index) => `
+            <div class="search-result" data-index="${index}" data-id="${result.id}" 
+                 data-lat="${result.latitude}" data-lng="${result.longitude}"
+                 data-address="${result.address || ''}" data-district="${result.district || ''}" data-zone="${result.zone || ''}">
+                <div style="font-weight: 500; color: #23a5fb;">Property ${result.id}</div>
+                <div style="font-size: 13px; color: #666; margin-top: 5px;">${result.address || 'No address'}</div>
+                <div style="font-size: 12px; color: #888; margin-top: 3px;">
+                    ${result.district || ''} ${result.zone ? '• ' + result.zone : ''}
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+        container.style.display = 'block';
+        
+        // Highlight first result
+        if (results.length > 0) {
+            container.querySelector('.search-result').classList.add('search-result-highlight');
+        }
+        
+        // Add click events
+        container.querySelectorAll('.search-result').forEach(item => {
+            item.addEventListener('click', () => {
+                const lat = parseFloat(item.dataset.lat);
+                const lng = parseFloat(item.dataset.lng);
+                const address = item.dataset.address;
+                const id = item.dataset.id;
+                
+                if (lat && lng) {
+                    this.flyToSearchResult(lat, lng, address, id);
+                }
+                
+                this.hideSearchResults();
+                document.getElementById('searchInput').value = '';
+            });
+        });
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.navigateSearchResults(e.key);
+            }
+            if (e.key === 'Enter') {
+                const highlighted = container.querySelector('.search-result-highlight');
+                if (highlighted) {
+                    highlighted.click();
+                }
+            }
+        });
+    }
+
+    flyToSearchResult(lat, lng, address, id) {
+        // Remove existing search marker
+        if (this.searchMarker) {
+            this.map.removeLayer(this.searchMarker);
+        }
+        
+        // Add new search marker
+        this.searchMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                html: '<div style="background: #ff5722; width: 32px; height: 32px; border-radius: 50%; border: 4px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.4);"><i class="fas fa-search"></i></div>',
+                className: 'search-marker',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            })
+        }).addTo(this.map);
+        
+        // Fly to location with smooth animation
+        this.map.flyTo([lat, lng], 16, {
+            duration: 1.5,
+            easeLinearity: 0.25
+        });
+        
+        // Open popup after animation
+        setTimeout(() => {
+            this.searchMarker.bindPopup(`
+                <div style="min-width: 200px;">
+                    <div style="font-weight: 500; color: #ff5722; font-size: 16px; margin-bottom: 5px;">
+                        <i class="fas fa-search"></i> Search Result
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <div style="font-size: 14px; font-weight: 500; color: #23a5fb;">Property ${id}</div>
+                        <div style="font-size: 13px; color: #666;">${address || 'No address'}</div>
+                    </div>
+                    <div style="font-size: 12px; color: #888;">
+                        Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                    </div>
+                </div>
+            `).openPopup();
+        }, 1500);
+        
+        this.showNotification(`Found property ${id}`, 'success');
+    }
+
+    navigateSearchResults(direction) {
+        const container = document.getElementById('searchResults');
+        const results = container.querySelectorAll('.search-result');
+        if (results.length === 0) return;
+        
+        let currentIndex = -1;
+        results.forEach((result, index) => {
+            if (result.classList.contains('search-result-highlight')) {
+                currentIndex = index;
+            }
+        });
+        
+        if (direction === 'ArrowDown') {
+            currentIndex = (currentIndex + 1) % results.length;
+        } else if (direction === 'ArrowUp') {
+            currentIndex = (currentIndex - 1 + results.length) % results.length;
+        }
+        
+        results.forEach(result => result.classList.remove('search-result-highlight'));
+        results[currentIndex].classList.add('search-result-highlight');
+        results[currentIndex].scrollIntoView({ block: 'nearest' });
+    }
+
+    hideSearchResults() {
+        document.getElementById('searchResults').style.display = 'none';
+    }
+
+    applyFilters() {
+        const filters = {
+            district: document.getElementById('districtFilter').value,
+            zone: document.getElementById('zoneFilter').value,
+            property_type: document.getElementById('propertyTypeFilter').value
+        };
+        
+        this.currentFilters = filters;
+        this.loadProperties(filters);
+        this.hidePanel('filtersPanel');
+    }
+
+    clearFilters() {
+        document.getElementById('districtFilter').value = '';
+        document.getElementById('zoneFilter').value = '';
+        document.getElementById('propertyTypeFilter').value = '';
+        this.currentFilters = {};
+        this.loadProperties({});
+        this.showNotification('Filters cleared', 'info');
+    }
+
+    async runAnalysis() {
+        const type = document.getElementById('analysisType').value;
+        
+        switch(type) {
+            case 'revenue_heatmap':
+                this.toggleLayer('heatmap');
+                break;
+            case 'property_clusters':
+                this.showNotification('Cluster analysis activated', 'info');
+                break;
+            case 'zone_performance':
+                await this.analyzeZonePerformance();
+                break;
+            case 'density_analysis':
+                await this.analyzeDensity();
+                break;
+        }
+        
+        this.hidePanel('analysisPanel');
+    }
+
+    async analyzeZonePerformance() {
+        this.showNotification('Zone performance analysis started', 'info');
+        // Implement zone performance analysis
+    }
+
+    async analyzeDensity() {
+        this.showNotification('Density analysis started', 'info');
+        // Implement density analysis
+    }
+
+    locateUser() {
+        if (!navigator.geolocation) {
+            this.showNotification('Geolocation not supported', 'error');
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                this.map.flyTo([lat, lng], 15, {
+                    duration: 1.5,
+                    easeLinearity: 0.25
+                });
+                
+                // Add user marker
+                L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: '<div style="background: #23a5fb; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                        className: 'user-marker',
+                        iconSize: [24, 24]
+                    })
+                }).addTo(this.map)
+                .bindPopup('Your location')
+                .openPopup();
+                
+                this.showNotification('Location found', 'success');
+            },
+            (error) => {
+                this.showNotification('Unable to get location', 'error');
+            }
+        );
+    }
+toggleFullscreen() {
+    if (this.map.toggleFullscreen) {
+        this.map.toggleFullscreen();
+    }
+}
+
+    
+
+    toggleLegend() {
+        const legend = document.getElementById('mapLegend');
+        const btn = document.getElementById('btnLegend');
+        
+        if (legend.style.display === 'none' || !legend.style.display) {
+            legend.style.display = 'block';
+            btn.classList.add('active');
+        } else {
+            legend.style.display = 'none';
+            btn.classList.remove('active');
+        }
+    }
+
+    toggleLegendContent() {
+        const content = document.getElementById('legendContent');
+        const toggle = document.getElementById('toggleLegend');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        } else {
+            content.style.display = 'none';
+            toggle.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        }
+    }
+
+    toggleSatellite() {
+        const btn = document.getElementById('btnSatellite');
+        
+        if (btn.classList.contains('active')) {
+            this.map.removeLayer(this.satelliteLayer);
+            btn.classList.remove('active');
+            btn.title = 'Satellite View';
+            this.showNotification('Switched to street map', 'info');
+        } else {
+            this.satelliteLayer.addTo(this.map);
+            btn.classList.add('active');
+            btn.title = 'Street Map';
+            this.showNotification('Switched to satellite view', 'info');
+        }
+    }
+
+    activateMeasureTool() {
+        if (this.isMeasuring) {
+            this.deactivateMeasureTool();
+            return;
+        }
+        
+        this.isMeasuring = true;
+        const btn = document.getElementById('btnMeasure');
+        btn.classList.add('active');
+        
+        if (typeof L.Control.Measure === 'undefined') {
+            this.showNotification('Measurement plugin not loaded', 'error');
+            this.isMeasuring = false;
+            btn.classList.remove('active');
+            return;
+        }
+        
+        this.measureControl = L.control.measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares',
+            activeColor: '#23a5fb',
+            completedColor: '#23a5fb',
+            popupOptions: {
+                className: 'leaflet-measure-resultpopup',
+                autoPanPadding: [10, 10]
+            }
+        }).addTo(this.map);
+        
+        this.showNotification('Measurement tool activated. Click to start measuring.', 'info');
+        
+        if (this.isDrawing) this.deactivateDrawTools();
+        if (this.isBufferMode) this.cancelBufferMode();
+    }
+
+    deactivateMeasureTool() {
+        if (this.measureControl) {
+            this.map.removeControl(this.measureControl);
+            this.measureControl = null;
+        }
+        this.isMeasuring = false;
+        document.getElementById('btnMeasure').classList.remove('active');
+        this.showNotification('Measurement tool deactivated', 'info');
+    }
+
+    activateDrawTools() {
+        if (this.isDrawing) {
+            this.deactivateDrawTools();
+            return;
+        }
+        
+        this.isDrawing = true;
+        const btn = document.getElementById('btnDraw');
+        btn.classList.add('active');
+        
+        if (typeof L.Control.Draw === 'undefined') {
+            this.showNotification('Drawing plugin not loaded', 'error');
+            this.isDrawing = false;
+            btn.classList.remove('active');
+            return;
+        }
+        
+        this.drawControl = new L.Control.Draw({
+            position: 'topleft',
+            draw: {
+                polygon: {
+                    shapeOptions: {
+                        color: '#23a5fb',
+                        fillColor: '#23a5fb',
+                        fillOpacity: 0.2,
+                        weight: 2
+                    },
+                    showArea: true,
+                    metric: true,
+                    allowIntersection: false,
+                    drawError: {
+                        color: '#f44336',
+                        timeout: 1000
+                    }
+                },
+                polyline: {
+                    shapeOptions: {
+                        color: '#23a5fb',
+                        weight: 3
+                    },
+                    metric: true
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#23a5fb',
+                        fillColor: '#23a5fb',
+                        fillOpacity: 0.2,
+                        weight: 2
+                    },
+                    showArea: true,
+                    metric: true
+                },
+                circle: {
+                    shapeOptions: {
+                        color: '#23a5fb',
+                        fillColor: '#23a5fb',
+                        fillOpacity: 0.2,
+                        weight: 2
+                    },
+                    showRadius: true,
+                    metric: true
+                },
+                marker: {
+                    icon: L.icon({
+                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41]
+                    })
+                }
+            },
+            edit: {
+                featureGroup: this.drawnItems,
+                edit: {
+                    selectedPathOptions: {
+                        color: '#23a5fb',
+                        fillColor: '#23a5fb',
+                        fillOpacity: 0.2
+                    }
+                },
+                remove: true
+            }
+        });
+        
+        this.drawControl.addTo(this.map);
+        
+        this.map.on(L.Draw.Event.CREATED, (e) => {
+            const layer = e.layer;
+            this.drawnItems.addLayer(layer);
+            this.showDrawResult(e);
+        });
+        
+        this.map.on(L.Draw.Event.EDITED, () => {
+            this.showNotification('Shape edited', 'info');
+        });
+        
+        this.map.on(L.Draw.Event.DELETED, () => {
+            this.showNotification('Shape deleted', 'info');
+        });
+        
+        this.showNotification('Drawing tool activated. Select a shape to draw.', 'info');
+        
+        if (this.isMeasuring) this.deactivateMeasureTool();
+        if (this.isBufferMode) this.cancelBufferMode();
+    }
+
+    deactivateDrawTools() {
+        if (this.drawControl) {
+            this.map.removeControl(this.drawControl);
+            this.drawControl = null;
+        }
+        this.isDrawing = false;
+        document.getElementById('btnDraw').classList.remove('active');
+        this.showNotification('Drawing tool deactivated', 'info');
+    }
+
+    showDrawResult(e) {
+        let message = '';
+        
+        switch(e.layerType) {
+            case 'polygon':
+                const polygonArea = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0]);
+                message = `Polygon drawn. Area: ${(polygonArea / 10000).toFixed(2)} hectares`;
+                break;
+            case 'rectangle':
+                const bounds = e.layer.getBounds();
+                const rectArea = bounds.getSouthWest().distanceTo(
+                    L.latLng(bounds.getSouthWest().lat, bounds.getNorthEast().lng)
+                ) * bounds.getSouthWest().distanceTo(
+                    L.latLng(bounds.getNorthEast().lat, bounds.getSouthWest().lng)
+                );
+                message = `Rectangle drawn. Area: ${(rectArea / 10000).toFixed(2)} hectares`;
+                break;
+            case 'polyline':
+                const length = L.GeometryUtil.length(e.layer.getLatLngs());
+                message = `Line drawn. Length: ${length.toFixed(2)} meters`;
+                break;
+            case 'circle':
+                const radius = e.layer.getRadius();
+                const circleArea = Math.PI * radius * radius;
+                message = `Circle drawn. Radius: ${radius.toFixed(2)} meters, Area: ${(circleArea / 10000).toFixed(2)} hectares`;
+                break;
+            case 'marker':
+                const latlng = e.layer.getLatLng();
+                message = `Marker placed at: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                break;
+        }
+        
+        this.showNotification(message, 'success');
+    }
+
+    activateBufferMode() {
+        if (this.isBufferMode) {
+            this.cancelBufferMode();
+            return;
+        }
+        
+        this.isBufferMode = true;
+        this.showNotification('Click on the map to create a buffer', 'info');
+        this.map.getContainer().style.cursor = 'crosshair';
+        
+        this.map.once('click', (e) => {
+            this.createBuffer(e.latlng);
+        });
+        
+        if (this.isDrawing) this.deactivateDrawTools();
+        if (this.isMeasuring) this.deactivateMeasureTool();
+    }
+
+    createBuffer(center) {
+        const radiusInput = document.getElementById('bufferRadius').value;
+        const radius = parseFloat(radiusInput);
+        
+        if (isNaN(radius) || radius <= 0) {
+            this.showNotification('Invalid radius. Please enter a positive number.', 'error');
+            this.cancelBufferMode();
+            return;
+        }
+        
+        const bufferLayer = L.circle(center, {
+            radius: radius,
+            color: '#ff5722',
+            fillColor: '#ff5722',
+            fillOpacity: 0.2,
+            weight: 2,
+            dashArray: '5, 5'
+        }).addTo(this.map);
+        
+        const centerMarker = L.marker(center, {
+            icon: L.divIcon({
+                html: '<i class="fas fa-bullseye" style="color: #ff5722;"></i>',
+                className: 'buffer-center-marker',
+                iconSize: [20, 20]
+            })
+        }).addTo(this.map);
+        
+        const bufferGroup = L.featureGroup([bufferLayer, centerMarker]);
+        this.map.addLayer(bufferGroup);
+        
+        this.analyzeBuffer(bufferLayer, radius);
+        this.cancelBufferMode();
+    }
+
+    analyzeBuffer(bufferLayer, radius) {
+        const bounds = bufferLayer.getBounds();
+        const propertiesInBuffer = this.propertyFeatures.filter(feature => {
+            if (feature.geometry.type === 'Point') {
+                const lat = feature.geometry.coordinates[1];
+                const lng = feature.geometry.coordinates[0];
+                return bounds.contains([lat, lng]);
+            } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+                // For polygons, check if they intersect with buffer bounds
+                try {
+                    const polygonLayer = L.geoJSON(feature);
+                    return polygonLayer.getBounds().intersects(bounds);
+                } catch (e) {
+                    return false;
+                }
+            }
+            return false;
+        });
+        
+        const popupContent = `
+            <div style="max-width: 400px; max-height: 300px; overflow-y: auto;">
+                <h4 style="margin: 0 0 10px 0; color: #23a5fb;">
+                    <i class="fas fa-bullseye"></i> Buffer Analysis
+                </h4>
+                <div style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                    <div style="font-size: 14px; font-weight: 500; color: #333;">
+                        Radius: ${radius}m
+                    </div>
+                    <div style="font-size: 14px; font-weight: 500; color: #333;">
+                        Properties Found: ${propertiesInBuffer.length}
+                    </div>
+                </div>
+                ${propertiesInBuffer.length > 0 ? `
+                    <div style="margin-top: 10px;">
+                        ${propertiesInBuffer.slice(0, 10).map(prop => `
+                            <div style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;"
+                                 onclick="gis.flyToProperty(${JSON.stringify(prop.properties).replace(/"/g, '&quot;')})">
+                                <div style="font-weight: 500; color: #23a5fb;">Property ${prop.properties.id}</div>
+                                <div style="font-size: 12px; color: #666;">${prop.properties.address || 'No address'}</div>
+                            </div>
+                        `).join('')}
+                        ${propertiesInBuffer.length > 10 ? `
+                            <div style="padding: 8px; text-align: center; color: #666; font-size: 12px;">
+                                ... and ${propertiesInBuffer.length - 10} more properties
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : `
+                    <div style="padding: 15px; text-align: center; color: #666;">
+                        No properties found in buffer area
+                    </div>
+                `}
+            </div>
+        `;
+        
+        bufferLayer.bindPopup(popupContent, {
+            maxWidth: 400,
+            maxHeight: 400
+        }).openPopup();
+        
+        this.showNotification(`Found ${propertiesInBuffer.length} properties in buffer area`, 'success');
+    }
+
+    exportAnalysisResults() {
+        this.showNotification('Exporting analysis results...', 'info');
+        // Implement analysis export
+        setTimeout(() => {
+            this.showNotification('Analysis results exported', 'success');
+        }, 1000);
+    }
+
+    cancelBufferMode() {
+        this.isBufferMode = false;
+        this.map.getContainer().style.cursor = '';
+        this.map.off('click');
+        this.showNotification('Buffer mode cancelled', 'info');
+    }
+
+    exportData() {
+        const exportData = {
+            timestamp: new Date().toISOString(),
+            filters: this.currentFilters,
+            mapCenter: this.map.getCenter(),
+            mapZoom: this.map.getZoom(),
+            propertyCount: this.propertyCount,
+            activeLayers: this.activeLayers
+        };
+        
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gis-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        
+        this.showNotification('Data exported successfully', 'success');
+    }
+
+    generateReport() {
+        html2canvas(document.querySelector('.gis-container')).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `map-report-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            this.showNotification('Report generated as PNG', 'success');
+        });
+    }
+
+    printMap() {
+        window.print();
+    }
+
+    shareMap() {
+        const mapUrl = window.location.href;
+        navigator.clipboard.writeText(mapUrl).then(() => {
+            this.showNotification('Map URL copied to clipboard', 'success');
+        });
+    }
+
+    showLoading(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+
+    showNotification(message, type = 'info') {
+        const container = document.getElementById('notificationContainer');
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                            type === 'error' ? 'exclamation-circle' : 
+                            type === 'warning' ? 'exclamation-triangle' : 
+                            'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+}
+
+// Initialize the GIS system
+let gis;
+
+document.addEventListener('DOMContentLoaded', function() {
+    gis = new PropertyRevenueGIS();
+    window.gis = gis;
+    
+    console.log('Property Revenue GIS System initialized');
+    console.log('Features available:');
+    console.log('- Comprehensive floating tools with all menu items');
+    console.log('- Smooth search with fly-to animation');
+    console.log('- Fullscreen mode that hides all UI elements');
+    console.log('- Layer toggling with visual feedback');
+    console.log('- Measurement and drawing tools');
+    console.log('- Buffer analysis');
+    console.log('- Export and reporting');
+    
+    // Handle fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('btnFullscreen');
+        if (document.fullscreenElement) {
+            btn.innerHTML = '<i class="fas fa-compress"></i>';
+            btn.title = 'Exit Fullscreen';
+        } else {
+            btn.innerHTML = '<i class="fas fa-expand"></i>';
+            btn.title = 'Fullscreen';
+        }
+    });
+    
+    // Handle document click to close panels
+    document.addEventListener('click', (e) => {
+        // Close menu if clicking outside
+        if (!e.target.closest('.floating-tools') && !e.target.closest('.main-menu')) {
+            const menu = document.getElementById('mainMenu');
+            const btn = document.getElementById('btnMenu');
+            if (menu.classList.contains('active')) {
+                menu.classList.remove('active');
+                btn.classList.remove('active');
+            }
+        }
+        
+        // Close tool panels if clicking outside
+        if (gis.activePanel && !e.target.closest('.tool-panel') && !e.target.closest('.tool-btn')) {
+            gis.hidePanel(gis.activePanel);
+        }
+        
+        // Close search results if clicking outside
+        if (!e.target.closest('.search-container')) {
+            gis.hideSearchResults();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -5,10 +5,13 @@ from core.views.property_registry.registry import *
 from core.views.property_registry.valuation import *
 from core.views.property_registry.classification import *
 from core.views.property_registry.owner import *
+from core.views.property_registry.map import *
 from core.views.billing.bill_generation import *
 from core.views.billing.rate_management import *
 from core.views.billing.tax_calculation import *
 from core.views.billing.billing_cycles import *
+from core.views.map.map import *
+
 
 
 urlpatterns = [
@@ -92,4 +95,21 @@ urlpatterns = [
     path('api/billing-cycles/upcoming/', get_upcoming_cycles, name='get_upcoming_cycles'),
     path('api/billing-cycles/generate-batch/', generate_cycles_batch, name='generate_cycles_batch'),
     path('api/billing-cycles/performance/', get_cycle_performance, name='get_cycle_performance'),
+
+    path('properties/mapping/', property_mapping, name='property_mapping'),
+    path('api/properties/geojson/', get_properties_geojson, name='get_properties_geojson'),
+    path('api/zones/geojson/', get_zones_geojson, name='get_zones_geojson'),
+    path('api/districts/geojson/', get_districts_geojson, name='get_districts_geojson'),
+    # path('api/map/analytics/', get_map_analytics, name='get_map_analytics'),
+    path('api/property/<str:property_id>/', get_property_details, name='get_property_details'),
+    path('api/search/properties/', search_properties, name='search_properties'),
+
+
+    path('api/map/properties/', properties_list, name='properties_list'),
+    path('api/map/properties/<str:identifier>/', property_detail, name='property_detail'),
+    path('api/map/zones/', zones_list, name='zones_list'),
+    path('api/map/zones/performance/', zones_performance, name='zones_performance'),
+    path('api/map/districts/', districts_list, name='districts_list'),
+    path('api/map/search/', search_properties, name='search_properties'),
+    path('api/map/heatmap/', heatmap_data, name='heatmap_data'),
 ]

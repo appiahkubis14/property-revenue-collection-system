@@ -56,27 +56,27 @@ class Sidebar:
                     "url": "/properties/mapping/",
                     "groups": ["Admin", "GIS Team", "Planning Team", "Assessment Team"]
                 },
-                "Property Reports": {
-                    "icon": "fas fa-file-alt", 
-                    "groups": ["Admin", "CEO", "Director", "Management", "Finance Team"],
-                    "sub_items": {
-                        "Valuation Reports": {
-                            "icon": "fas fa-chart-pie", 
-                            "url": "/properties/reports/valuation/",
-                            "groups": ["Admin", "CEO", "Director", "Finance Team"]
-                        },
-                        "Property Inventory": {
-                            "icon": "fas fa-clipboard-list", 
-                            "url": "/properties/reports/inventory/",
-                            "groups": ["Admin", "Assessment Team", "Planning Team"]
-                        },
-                        "Ownership Trends": {
-                            "icon": "fas fa-chart-line", 
-                            "url": "/properties/reports/trends/",
-                            "groups": ["Admin", "CEO", "Director", "Planning Team"]
-                        },
-                    }
-                },
+                # "Property Reports": {
+                #     "icon": "fas fa-file-alt", 
+                #     "groups": ["Admin", "CEO", "Director", "Management", "Finance Team"],
+                #     "sub_items": {
+                #         "Valuation Reports": {
+                #             "icon": "fas fa-chart-pie", 
+                #             "url": "/properties/reports/valuation/",
+                #             "groups": ["Admin", "CEO", "Director", "Finance Team"]
+                #         },
+                #         "Property Inventory": {
+                #             "icon": "fas fa-clipboard-list", 
+                #             "url": "/properties/reports/inventory/",
+                #             "groups": ["Admin", "Assessment Team", "Planning Team"]
+                #         },
+                #         "Ownership Trends": {
+                #             "icon": "fas fa-chart-line", 
+                #             "url": "/properties/reports/trends/",
+                #             "groups": ["Admin", "CEO", "Director", "Planning Team"]
+                #         },
+                #     }
+                # },
             }
         },
 

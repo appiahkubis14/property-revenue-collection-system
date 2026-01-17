@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_user_agents',
     'widget_tweaks',
     'leaflet',
+    'django.contrib.gis',
    
 
     # Local apps

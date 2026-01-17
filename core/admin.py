@@ -51,8 +51,8 @@ class ZoneResource(resources.ModelResource):
 class PropertyTypeResource(resources.ModelResource):
     class Meta:
         model = PropertyType
-        import_id_fields = ['code']
-        fields = ('id', 'name', 'code', 'description', 'base_rate', 'is_active', 'created_at', 'updated_at')
+        import_id_fields = ['g_code']
+        fields = ('id', 'name', 'g_code', 'description', 'base_rate', 'is_active', 'created_at', 'updated_at')
 
 class PropertyResource(resources.ModelResource):
     zone = Field(attribute='zone', column_name='zone', widget=ForeignKeyWidget(Zone, 'code'))
@@ -61,9 +61,7 @@ class PropertyResource(resources.ModelResource):
     class Meta:
         model = Property
         import_id_fields = ['property_id']
-        fields = ('id', 'property_id', 'address', 'coordinates', 'zone', 'property_type', 
-                 'total_area', 'built_up_area', 'floor_count', 'year_built', 'market_value', 
-                 'assessed_value', 'status', 'geo_data', 'geom', 'g_code', 'area_in_me', 
+        fields = ('id', 'geom', 'g_code', 'area_in_me', 
                  'gpsname', 'region', 'district', 'postcode', 'nlat', 'slat', 'wlong', 
                  'elong', 'area', 'addressv1', 'street', 'latitude', 'longitude', 
                  'created_at', 'updated_at')
@@ -311,9 +309,13 @@ class PropertyTypeAdmin(ImportExportModelAdmin):
 @admin.register(Property)
 class PropertyAdmin(ImportExportModelAdmin):
     resource_class = PropertyResource
-    list_display = ('property_id', 'address', 'zone', 'property_type', 'total_area', 'market_value', 'status', 'created_at')
-    list_filter = ('zone', 'property_type', 'status', 'created_at')
-    search_fields = ('property_id', 'address', 'region', 'district')
+    list_display = ('id', 'address', 'g_code', 'area_in_me', 
+                 'gpsname', 'region', 'district', 'postcode', 'nlat', 'slat', 'wlong', 
+                 'elong', 'area', 'addressv1', 'street', 'latitude', 'longitude', 
+                 'created_at', 'updated_at')
+    
+    list_filter = ('zone', 'property_type', 'created_at')
+    search_fields = ( 'address', 'region', 'district')
     readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(PropertyOwner)

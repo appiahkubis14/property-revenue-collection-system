@@ -197,20 +197,12 @@ class Property(TimeStampModel):
         ('demolished', 'Demolished'),
     )
     
-    property_id = models.CharField(max_length=20, unique=True)
-    address = models.TextField()
-    coordinates = models.JSONField()  # Latitude and longitude
+    # property_id = models.CharField(max_length=20, unique=True)
+    address = models.TextField(null=True, blank=True)
+    coordinates = models.JSONField(null=True, blank=True)  # Latitude and longitude
     zone = models.ForeignKey(Zone, on_delete=models.PROTECT, related_name='properties')
     property_type = models.ForeignKey(PropertyType, on_delete=models.PROTECT, related_name='properties')
-    total_area = models.DecimalField(max_digits=12, decimal_places=2)  # in square meters
-    built_up_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    floor_count = models.IntegerField(default=1)
-    year_built = models.IntegerField(null=True, blank=True)
-    market_value = models.DecimalField(max_digits=15, decimal_places=2)
-    assessed_value = models.DecimalField(max_digits=15, decimal_places=2)
-    status = models.CharField(max_length=20, choices=PROPERTY_STATUS_CHOICES, default='active')
-    geo_data = models.JSONField(null=True, blank=True)  # Additional geospatial data
-    geom = models.TextField(null=True, blank=True)  # Geometry data in WKT or GeoJSON format
+    geom = GeometryField(blank=True, null=True, srid=4326)
     g_code = models.CharField(max_length=50, blank=True)  # Geographic code
     area_in_me = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name="Area in Square Meters")  # Alternative area field
     gpsname = models.CharField(max_length=200, blank=True, verbose_name="GPS Name")  # GPS location name
@@ -228,14 +220,14 @@ class Property(TimeStampModel):
     longitude = models.DecimalField(max_digits=15, decimal_places=12, null=True, blank=True)  # Point longitude
 
 
-    def generate_property_id(self):
-        # Generate a random property ID
-        property_id = secrets.token_hex(10)
-        return property_id
+    # def generate_property_id(self):
+    #     # Generate a random property ID
+    #     property_id = secrets.token_hex(10)
+    #     return property_id
   
 
     def __str__(self):
-        return f"{self.property_id} - {self.address}"
+        return f"{self.address}"
 
 
 class PropertyOwner(TimeStampModel):

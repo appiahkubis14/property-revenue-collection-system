@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -166,7 +167,9 @@ def update_valuation(request, bill_id):
             # If assessed value changed, recalculate tax
             if data.get('assessed_value'):
                 prop = bill.property
-                prop.assessed_value = data.get('assessed_value')
+                # Convert string to Decimal
+                assessed_value = Decimal(data.get('assessed_value'))
+                prop.assessed_value = assessed_value
                 prop.modified_by = request.user
                 prop.save()
                 
@@ -178,9 +181,10 @@ def update_valuation(request, bill_id):
                 ).first()
                 
                 if tax_rate:
-                    new_tax_amount = (prop.assessed_value * tax_rate.rate) / 100
+                    new_tax_amount = (assessed_value * tax_rate.rate) / 100
                     bill.tax_amount = new_tax_amount
-                    bill.total_amount = new_tax_amount + bill.penalty_amount - bill.discount_amount
+                    # Also fix this line - bill.tax_amount is already set above
+                    bill.total_amount = Decimal(bill.tax_amount) + new_tax_amount + bill.penalty_amount - bill.discount_amount
             
             bill.save()
         
@@ -190,10 +194,13 @@ def update_valuation(request, bill_id):
         })
         
     except Exception as e:
+        print(e)
         return JsonResponse({
             'success': False, 
             'error': f'Failed to update valuation: {str(e)}'
         })
+    
+    
 
 @login_required
 @require_http_methods(["DELETE"])
